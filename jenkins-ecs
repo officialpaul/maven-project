@@ -1,15 +1,19 @@
+
 pipeline {
     agent any
 
     tools {
-        maven "MAVEN3"
-        jdk "oracleJDK8"
+        maven "Maven3"
+        jdk "Openjdk_17"
     }
 
     environment {
-        awsEcrCreds = 'ecr:us-east-2:JenkinsAWSCLI'
-        awsEcrRegistry =  "392102158411.dkr.ecr.us-east-2.amazonaws.com/devopsacad-d-image"
-        devopsacadEcrImgReg = "https://392102158411.dkr.ecr.us-east-2.amazonaws.com"
+        awsEcrCreds = 'ecr:us-east-1:JenkinsAWSCLI'
+        awsEcrRegistry =  "611345106517.dkr.ecr.us-east-1.amazonaws.com/myawsrepo"
+        devopsacadEcrImgReg = "https://611345106517.dkr.ecr.us-east-1.amazonaws.com"
+        awsRegion = 'us-west-1'
+        cluster = 'webapp'
+        service = 'webapp-svc'
     }
 
     stages {
@@ -49,5 +53,16 @@ pipeline {
                 }
             }
         }
+
+        stage ('Deploy to ECS') {
+            steps {
+                script {
+                    withAWS(credentials: 'JenkinsAWSCLI', region: "${awsRegion}") {
+                        sh 'aws ecs update-service --cluster ${cluster} --service ${service} --force-new-deployment'
+                    }
+                }
+            }
+        }
     }
 }
+ 
